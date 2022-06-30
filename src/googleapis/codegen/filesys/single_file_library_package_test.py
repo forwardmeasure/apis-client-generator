@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2012 Google Inc. All Rights Reserved.
@@ -23,42 +23,42 @@ from __future__ import print_function
 
 from io import BytesIO
 
-import gflags as flags
-from google.apputils import basetest
-from googleapis.codegen.filesys import single_file_library_package
+from absl import flags as flags
+from absl.testing import absltest
+from filesys import single_file_library_package
 
 FLAGS = flags.FLAGS
 
 
-class SingleFileLibraryPackageTest(basetest.TestCase):
+class SingleFileLibraryPackageTest(absltest.TestCase):
 
-  def setUp(self):
-    self._output_stream = BytesIO()
-    self._package = single_file_library_package.SingleFileLibraryPackage(
-        self._output_stream)
+    def setUp(self):
+        self._output_stream = BytesIO()
+        self._package = single_file_library_package.SingleFileLibraryPackage(
+            self._output_stream)
 
-  def tearDown(self):
-    pass
+    def tearDown(self):
+        pass
 
-  def testBasicWriteFile(self):
-    name1 = 'def'
-    content1 = 'contents of def'
-    name2 = 'abc'
-    content2 = 'contents of abc'
-    expected_tmpl = '=== begin: %s\n%s=== end: %s\n'
+    def testBasicWriteFile(self):
+        name1 = 'def'
+        content1 = 'contents of def'
+        name2 = 'abc'
+        content2 = 'contents of abc'
+        expected_tmpl = '=== begin: %s\n%s=== end: %s\n'
 
-    stream = self._package.StartFile(name1)
-    stream.write(content1)
-    stream = self._package.StartFile(name2)
-    stream.write(content2)
-    self._package.DoneWritingArchive()
+        stream = self._package.StartFile(name1)
+        stream.write(content1)
+        stream = self._package.StartFile(name2)
+        stream.write(content2)
+        self._package.DoneWritingArchive()
 
-    # read it back and verify
-    expected = expected_tmpl % (name2, content2, name2)
-    expected += expected_tmpl % (name1, content1, name1)
-    got = self._output_stream.getvalue()
-    self.assertEqual(expected, got)
+        # read it back and verify
+        expected = expected_tmpl % (name2, content2, name2)
+        expected += expected_tmpl % (name1, content1, name1)
+        got = self._output_stream.getvalue()
+        self.assertEqual(expected, got)
 
 
 if __name__ == '__main__':
-  basetest.main()
+    basetest.main()

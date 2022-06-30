@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2012 Google Inc. All Rights Reserved.
 #
 
@@ -7,16 +7,15 @@
 __author__ = 'akesling@google.com (Alex Kesling)'
 
 
-from googleapis.codegen import cpp_generator
-from googleapis.codegen import csharp_generator
-from googleapis.codegen import dart_generator
-from googleapis.codegen import gwt_generator
-from googleapis.codegen import java_generator
-from googleapis.codegen import objc_generator
-from googleapis.codegen import php_generator
-from googleapis.codegen import python_generator
-from googleapis.codegen import sample_generator
-
+import cpp_generator
+import csharp_generator
+import dart_generator
+import gwt_generator
+import java_generator
+import objc_generator
+import php_generator
+import python_generator
+import sample_generator
 
 # Multiple generators per language are possible, as is the case with
 # Java below. Template trees can specify a specific generator in their
@@ -38,33 +37,33 @@ _GENERATORS_BY_LANGUAGE = {
     'php': php_generator.PHPGenerator,
     'python': python_generator.PythonGenerator,
     'sample': sample_generator.SampleGenerator,
-    }
+}
 
 
 def GetGeneratorByLanguage(language_or_generator):
-  """Return the appropriate generator for this language.
+    """Return the appropriate generator for this language.
 
-  Args:
-    language_or_generator: (str) the language for which to return a generator,
-        or the name of a specific generator.
+    Args:
+      language_or_generator: (str) the language for which to return a generator,
+          or the name of a specific generator.
 
-  Raises:
-    ValueError: If provided language isn't supported.
+    Raises:
+      ValueError: If provided language isn't supported.
 
-  Returns:
-    The appropriate code generator object (which may be None).
-  """
+    Returns:
+      The appropriate code generator object (which may be None).
+    """
 
-  try:
-    return _GENERATORS_BY_LANGUAGE[language_or_generator]
-  except KeyError:
-    raise ValueError('Unsupported language: %s' % language_or_generator)
+    try:
+        return _GENERATORS_BY_LANGUAGE[language_or_generator]
+    except KeyError:
+        raise ValueError('Unsupported language: %s' % language_or_generator)
 
 
 def SupportedLanguages():
-  """Return the list of languages we support.
+    """Return the list of languages we support.
 
-  Returns:
-    list(str)
-  """
-  return sorted(_GENERATORS_BY_LANGUAGE)
+    Returns:
+      list(str)
+    """
+    return sorted(_GENERATORS_BY_LANGUAGE)

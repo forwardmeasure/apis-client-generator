@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2012 Google Inc. All Rights Reserved.
 
 """List of platforms we can target libraries for.
@@ -20,7 +20,7 @@ PLATFORMS = {
     'java': ['android', 'android2', 'android3', 'appengine', 'servlet',
              'generic'],
     'javaproto': ['android', 'appengine', 'servlet', 'generic'],
-    }
+}
 
 # Definitions:
 # *: required in all environments
@@ -30,4 +30,4 @@ PLATFORMS = {
 FILE_TYPES = {
     ALL: ['binary', 'bundle', 'documentation', 'source', 'license',
           'android-properties', 'proguard-config', 'other']
-    }
+}

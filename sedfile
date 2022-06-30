@@ -1,0 +1,11 @@
+#!/bin/bash -x
+
+SRC_DIR=$PWD/src/googleapis/codegen/languages/java/1.19.0
+SRC_DIR=$PWD/src
+
+find $SRC_DIR -name '*.tmpl' | xargs \
+    sed -i -r -E \
+        -e 's/\<endifequal\>/endif/g' \
+        -e 's/\<ifequal\>\s*([a-zA-Z\.0-9\"]*)\s*([a-zA-Z\.0-9\"]*)/if \1 == \2/g' \
+        -e 's/\<endifnotequal\>/endif/g' \
+        -e 's/\<ifnotequal\>\s*([a-zA-Z\.0-9\"]*)\s*([a-zA-Z\.0-9\"]*)/if \1 != \2/g'

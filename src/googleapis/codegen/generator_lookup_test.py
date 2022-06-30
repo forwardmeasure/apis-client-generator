@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2012 Google Inc. All Rights Reserved.
 
 """Tests for generator_lookup."""
@@ -9,39 +9,39 @@ import json
 import os
 
 
-from google.apputils import basetest
+from absl.testing import absltest
 
-from googleapis.codegen import generator_lookup
-from googleapis.codegen import gwt_generator
-from googleapis.codegen import java_generator
-from googleapis.codegen import targets
+import generator_lookup
+import gwt_generator
+import java_generator
+import targets
 
 
-class GeneratorLookupTest(basetest.TestCase):
+class GeneratorLookupTest(absltest.TestCase):
 
-  def testDetermineGenerator(self):
-    test_gen = generator_lookup.GetGeneratorByLanguage('java')
-    self.assertEqual(java_generator.Java14Generator, test_gen)
-    self.assertRaises(
-        ValueError, generator_lookup.GetGeneratorByLanguage,
-        'I\'m an invalid language!')
+    def testDetermineGenerator(self):
+        test_gen = generator_lookup.GetGeneratorByLanguage('java')
+        self.assertEqual(java_generator.Java14Generator, test_gen)
+        self.assertRaises(
+            ValueError, generator_lookup.GetGeneratorByLanguage,
+            'I\'m an invalid language!')
 
-  def testSupportedLanguage(self):
-    languages = generator_lookup.SupportedLanguages()
-    self.assertContainsSubset(['dart', 'gwt', 'java', 'php'], languages)
-    self.assertNotIn('java-head', languages)
+    def testSupportedLanguage(self):
+        languages = generator_lookup.SupportedLanguages()
+        self.assertContainsSubset(['dart', 'gwt', 'java', 'php'], languages)
+        self.assertNotIn('java-head', languages)
 
-  def testVersionFromFeature(self):
-    template_root = os.path.join(os.path.dirname(__file__),
-                                 'testdata/languages')
-    targets.Targets.SetDefaultTemplateRoot(template_root)
-    features_path = os.path.join(template_root,
-                                 'java/generator_test/features.json')
-    raw_features = json.load(open(features_path))
-    generator_name = raw_features['generator']
-    gen = generator_lookup.GetGeneratorByLanguage(generator_name)
-    self.assertEquals(gwt_generator.GwtGenerator, gen)
+    def testVersionFromFeature(self):
+        template_root = os.path.join(os.path.dirname(__file__),
+                                     'testdata/languages')
+        targets.Targets.SetDefaultTemplateRoot(template_root)
+        features_path = os.path.join(template_root,
+                                     'java/generator_test/features.json')
+        raw_features = json.load(open(features_path))
+        generator_name = raw_features['generator']
+        gen = generator_lookup.GetGeneratorByLanguage(generator_name)
+        self.assertEquals(gwt_generator.GwtGenerator, gen)
 
 
 if __name__ == '__main__':
-  basetest.main()
+    basetest.main()

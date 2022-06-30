@@ -197,7 +197,7 @@ public class {{ method.className }} extends {{ api.className }}Request<{{ method
     return super.executeMedia();
   }
 {% endif %}
-{% ifequal method.httpMethod "GET" %}
+{% if method.httpMethod == "GET" %}
 
   @Override
   public com.google.api.client.http.HttpResponse executeUsingHead() throws java.io.IOException {
@@ -208,7 +208,7 @@ public class {{ method.className }} extends {{ api.className }}Request<{{ method
   public com.google.api.client.http.HttpRequest buildHttpRequestUsingHead() throws java.io.IOException {
     return super.buildHttpRequestUsingHead();
   }
-{% endifequal %}
+{% endif %}
 {% for param in api.parameters %}
 
   @Override
@@ -217,7 +217,7 @@ public class {{ method.className }} extends {{ api.className }}Request<{{ method
   }{% endfor %}
 {% for param in method.parameters %}
 {% indent 1 %}{% doc_comment_if param.description %}{% endindent %}
-  @com.google.api.client.util.Key{% ifnotequal param.wireName param.memberName %}("{{ param.wireName }}"){% endifnotequal %}
+  @com.google.api.client.util.Key{% if param.wireName != param.memberName %}("{{ param.wireName }}"){% endif %}
   private {{ param.codeType }} {{ param.memberName }};
 
   /**{% filter block_comment %}{{ param.description }}
@@ -237,9 +237,9 @@ public class {{ method.className }} extends {{ api.className }}Request<{{ method
     return this;
 {% endfilter %}
   }
-{% ifequal param.codeType "java.lang.Boolean" %}{% ifnotequal param.default null %}
+{% if param.codeType == "java.lang.Boolean" %}{% if param.default != null %}
 {% call_template _bool_getter_content_def property=param %}
-{% endifnotequal %}{% endifequal %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
 
   @Override
   public {{ method.className }} set(String parameterName, Object value) {

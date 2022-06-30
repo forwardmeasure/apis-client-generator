@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Run the Google APIs client generator
 #

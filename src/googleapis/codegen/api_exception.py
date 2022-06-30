@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +17,20 @@
 
 
 class ApiException(Exception):
-  """The base class for all API parsing exceptions."""
+    """The base class for all API parsing exceptions."""
 
-  def __init__(self, reason, def_dict=None):
-    """Create an exception.
+    def __init__(self, reason, def_dict=None):
+        """Create an exception.
 
-    Args:
-      reason: (str) The human readable explanation of this exception.
-      def_dict: (dict) The discovery dictionary we failed on.
-    """
-    super(ApiException, self).__init__()
-    self._reason = reason
-    self._def_dict = def_dict
+        Args:
+          reason: (str) The human readable explanation of this exception.
+          def_dict: (dict) The discovery dictionary we failed on.
+        """
+        super(ApiException, self).__init__()
+        self._reason = reason
+        self._def_dict = def_dict
 
-  def __str__(self):
-    if self._def_dict:
-      return '%s: %s' % (self._reason, self._def_dict)
-    return self._reason
+    def __str__(self):
+        if self._def_dict:
+            return '%s: %s' % (self._reason, self._def_dict)
+        return self._reason

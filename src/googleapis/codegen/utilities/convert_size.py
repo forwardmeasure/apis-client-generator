@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,18 +20,18 @@ Convert a string like 10G/K/M/B to a number.
 
 
 def ConvertSize(size):
-  if not size:
+    if not size:
+        return None
+    units = [('GB', 2 ** 30),
+             ('MB', 2 ** 20),
+             ('KB', 2 ** 10),
+             ('B', 1)]
+    size = size.upper()
+    for suffix, multiplier in units:
+        if size.endswith(suffix):
+            num_units = size[:-len(suffix)]
+            try:
+                return int(num_units) * multiplier
+            except (ValueError, KeyError):
+                break
     return None
-  units = [('GB', 2 ** 30),
-           ('MB', 2 ** 20),
-           ('KB', 2 ** 10),
-           ('B', 1)]
-  size = size.upper()
-  for suffix, multiplier in units:
-    if size.endswith(suffix):
-      num_units = size[:-len(suffix)]
-      try:
-        return int(num_units) * multiplier
-      except (ValueError, KeyError):
-        break
-  return None

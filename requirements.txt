@@ -1,0 +1,5 @@
+django==4.0.5
+httplib2==0.20.4
+absl-py==1.1.0
+google-api-python-client==2.52.0
+html-stripper==0.3

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
@@ -20,82 +20,82 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from google.apputils import basetest
-from googleapis.codegen.utilities import name_validator
+from absl.testing import absltest
+from utilities import name_validator
 
 
-class NameValidatorTest(basetest.TestCase):
+class NameValidatorTest(absltest.TestCase):
 
-  def testVariableNameValidator(self):
-    good_names = ['$ref', '_a', '_private', 'a_var.name', 't1', 'max-results',
-                  'slashes/are/allowed', '/even/at/the/start/and/end/',
-                  'now_valid.', '@foo', 'foo$bar']
-    bad_names = ['$', '1st_result', '^test', '.variable', '1', '_', 'no spaces',
-                 'foo@']
+    def testVariableNameValidator(self):
+        good_names = ['$ref', '_a', '_private', 'a_var.name', 't1', 'max-results',
+                      'slashes/are/allowed', '/even/at/the/start/and/end/',
+                      'now_valid.', '@foo', 'foo$bar']
+        bad_names = ['$', '1st_result', '^test', '.variable', '1', '_', 'no spaces',
+                     'foo@']
 
-    for varname in good_names:
-      name_validator.Validate(varname)
-    for varname in bad_names:
-      print("'%s'" % varname)
-      self.assertRaises(name_validator.ValidationError,
-                        name_validator.Validate, varname)
+        for varname in good_names:
+            name_validator.Validate(varname)
+        for varname in bad_names:
+            print("'%s'" % varname)
+            self.assertRaises(name_validator.ValidationError,
+                              name_validator.Validate, varname)
 
-  def testApiNameValidator(self):
-    good_names = ['valid', 'isValid', 'is2Valid']
-    bad_names = ['1noLeadingNumbers', '^test', 'NotValid', 'no-dash',
-                 'dot.is.not.valid', 'no spaces', 'no/slash', 'no:colon']
+    def testApiNameValidator(self):
+        good_names = ['valid', 'isValid', 'is2Valid']
+        bad_names = ['1noLeadingNumbers', '^test', 'NotValid', 'no-dash',
+                     'dot.is.not.valid', 'no spaces', 'no/slash', 'no:colon']
 
-    for varname in good_names:
-      name_validator.ValidateApiName(varname)
-    for varname in bad_names:
-      print("'%s'" % varname)
-      self.assertRaises(name_validator.ValidationError,
-                        name_validator.ValidateApiName, varname)
+        for varname in good_names:
+            name_validator.ValidateApiName(varname)
+        for varname in bad_names:
+            print("'%s'" % varname)
+            self.assertRaises(name_validator.ValidationError,
+                              name_validator.ValidateApiName, varname)
 
-  def testApiVersionValidator(self):
-    good_names = ['v1', 'v1_us', 'v1.2', '1.2', 'with-dash']
-    bad_names = ['.1', '1 2', 'no spaces', 'no/slash', 'no:colon']
+    def testApiVersionValidator(self):
+        good_names = ['v1', 'v1_us', 'v1.2', '1.2', 'with-dash']
+        bad_names = ['.1', '1 2', 'no spaces', 'no/slash', 'no:colon']
 
-    for varname in good_names:
-      name_validator.ValidateApiVersion(varname)
-    for varname in bad_names:
-      print("'%s'" % varname)
-      self.assertRaises(name_validator.ValidationError,
-                        name_validator.ValidateApiVersion, varname)
+        for varname in good_names:
+            name_validator.ValidateApiVersion(varname)
+        for varname in bad_names:
+            print("'%s'" % varname)
+            self.assertRaises(name_validator.ValidationError,
+                              name_validator.ValidateApiVersion, varname)
 
-  def testCommentValidator(self):
-    good_comments = ['Responses with Content-Type',
-                     'application/json',
-                     ',',
-                     '[minimum: 4.4.1]',
-                     'API key. Your API key identifies your project',
-                     'OAuth 2.0 token for the current user.']
-    # A list of input comments, and their expected replacements
-    bad_comments = [('/*', ''),
-                    ('*/', ''),
-                    ('\"""', ''),
-                    ('///', ''),
-                    ('\\*', ''),
-                    ('/*Some Comment String*/', 'Some Comment String'),
-                    ('\""" A long comment string """',
-                     ' A long comment string '),
-                    ('///Escaped comment string', 'Escaped comment string'),
-                   ]
+    def testCommentValidator(self):
+        good_comments = ['Responses with Content-Type',
+                         'application/json',
+                         ',',
+                         '[minimum: 4.4.1]',
+                         'API key. Your API key identifies your project',
+                         'OAuth 2.0 token for the current user.']
+        # A list of input comments, and their expected replacements
+        bad_comments = [('/*', ''),
+                        ('*/', ''),
+                        ('\"""', ''),
+                        ('///', ''),
+                        ('\\*', ''),
+                        ('/*Some Comment String*/', 'Some Comment String'),
+                        ('\""" A long comment string """',
+                         ' A long comment string '),
+                        ('///Escaped comment string', 'Escaped comment string'),
+                        ]
 
-    for comment in good_comments:
-      name_validator.ValidateAndSanitizeComment(comment)
-    for comment, replacement in bad_comments:
-      self.assertEqual(replacement,
-                       name_validator.ValidateAndSanitizeComment(comment))
+        for comment in good_comments:
+            name_validator.ValidateAndSanitizeComment(comment)
+        for comment, replacement in bad_comments:
+            self.assertEqual(replacement,
+                             name_validator.ValidateAndSanitizeComment(comment))
 
-  def testUtf8InComment(self):
-    comment = u'Base64-encoded (RFC 4648 §5) data.'
-    self.assertEqual(comment,
-                     name_validator.ValidateAndSanitizeComment(comment))
-    self.assertEqual(
-        comment,
-        name_validator.ValidateAndSanitizeComment(comment))
+    def testUtf8InComment(self):
+        comment = u'Base64-encoded (RFC 4648 §5) data.'
+        self.assertEqual(comment,
+                         name_validator.ValidateAndSanitizeComment(comment))
+        self.assertEqual(
+            comment,
+            name_validator.ValidateAndSanitizeComment(comment))
 
 
 if __name__ == '__main__':
-  basetest.main()
+    basetest.main()

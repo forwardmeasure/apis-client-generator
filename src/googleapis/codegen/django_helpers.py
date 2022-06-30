@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,23 +22,21 @@ __author__ = 'aiuto@google.com (Tony Aiuto)'
 
 import os
 
-
-
 from django import template as django_template
 from django import utils as django_utils
 from django.conf import settings
+
 # COV_NF_START
 try:
-  # In AppEngine, we have to call use_library() in our main. Doing that causes
-  # an error, which we can safely ignore because use_library did it
-  settings.configure()
-  os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+    # In AppEngine, we have to call use_library() in our main. Doing that causes
+    # an error, which we can safely ignore because use_library did it
+    settings.configure()
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 except RuntimeError:
-  pass
+    pass
 
-from googleapis.codegen import template_helpers
-from googleapis.codegen.filesys import files
-
+import template_helpers
+from filesys import files
 
 # COV_NF_END
 
@@ -48,48 +46,48 @@ from googleapis.codegen.filesys import files
 # standalone app, not running in their context, so we have to go under the hood
 # a little. We must create all templates with this engine.
 _ENGINE = django_template.engine.Engine(
-    builtins=['googleapis.codegen.template_helpers'])
+    builtins=['template_helpers'])
 
 
 def DjangoRenderTemplate(template_path, context_dict):
-  """Renders a template specified by a file path with a give values dict.
+    """Renders a template specified by a file path with a give values dict.
 
-  Args:
-    template_path: (str) Path to file.
-    context_dict: (dict) The dictionary to use for template evaluation.
-  Returns:
-    (str) The expanded template.
-  """
+    Args:
+      template_path: (str) Path to file.
+      context_dict: (dict) The dictionary to use for template evaluation.
+    Returns:
+      (str) The expanded template.
+    """
 
-  source = files.GetFileContents(template_path).decode('utf-8')
-  return _DjangoRenderTemplateSource(source, context_dict)
+    source = files.GetFileContents(template_path)
+    return _DjangoRenderTemplateSource(source, context_dict)
 
 
 def DjangoTemplate(source):
-  """Returns a template configured for our default engine.
+    """Returns a template configured for our default engine.
 
-  Args:
-    source: (str) Template source.
-  Returns:
-    (django.template.Template)
-  """
-  return django_template.Template(source, engine=_ENGINE)
+    Args:
+      source: (str) Template source.
+    Returns:
+      (django.template.Template)
+    """
+    return django_template.Template(source, engine=_ENGINE)
 
 
 def _DjangoRenderTemplateSource(template_source, context_dict):
-  """Renders the given template source with the given values dict.
+    """Renders the given template source with the given values dict.
 
-  Args:
-    template_source: (str) The source of a django template.
-    context_dict: (dict) The dictionary to use for template evaluation.
-  Returns:
-    (str) The expanded template.
-  """
-  t = DjangoTemplate(template_source)
-  ctxt = django_template.Context(context_dict)
-  with template_helpers.SetCurrentContext(ctxt):
-    return t.render(ctxt)
+    Args:
+      template_source: (str) The source of a django template.
+      context_dict: (dict) The dictionary to use for template evaluation.
+    Returns:
+      (str) The expanded template.
+    """
+    t = DjangoTemplate(template_source)
+    ctxt = django_template.Context(context_dict)
+    with template_helpers.SetCurrentContext(ctxt):
+        return t.render(ctxt)
 
 
 def MarkSafe(s):
-  return django_utils.safestring.mark_safe(s)
+    return django_utils.safestring.mark_safe(s)

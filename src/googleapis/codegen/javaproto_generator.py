@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2013 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,45 +18,45 @@
 
 __author__ = 'yanivi@google.com (Yaniv Inbar)'
 
-from googleapis.codegen import api_library_generator
-from googleapis.codegen import data_types
-from googleapis.codegen.java_generator import JavaApi
-from googleapis.codegen.java_generator import JavaLanguageModel
+import api_library_generator
+import data_types
+from java_generator import JavaApi
+from java_generator import JavaLanguageModel
 
 
 class JavaProtoGenerator(api_library_generator.ApiLibraryGenerator):
-  """Java protobuf code generator."""
+    """Java protobuf code generator."""
 
-  def __init__(self, discovery, language='javaproto', language_model=None,
-               options=None):
-    if not language_model:
-      language_model = self._GetDefaultLanguageModel(options)
-    super(JavaProtoGenerator, self).__init__(JavaApi, discovery, language,
-                                             language_model, options=options)
+    def __init__(self, discovery, language='javaproto', language_model=None,
+                 options=None):
+        if not language_model:
+            language_model = self._GetDefaultLanguageModel(options)
+        super(JavaProtoGenerator, self).__init__(JavaApi, discovery, language,
+                                                 language_model, options=options)
 
-  @classmethod
-  def _GetDefaultLanguageModel(cls, options=None):
-    return JavaLanguageModel(options=options)
+    @classmethod
+    def _GetDefaultLanguageModel(cls, options=None):
+        return JavaLanguageModel(options=options)
 
-  def AnnotateMethod(self, unused_the_api, method, unused_resource):
-    """Annotate a Method with Java Proto specific elements.
+    def AnnotateMethod(self, unused_the_api, method, unused_resource):
+        """Annotate a Method with Java Proto specific elements.
 
-    Args:
-      unused_the_api: (Api) The API tree which owns this method.
-      method: (Method) The method to annotate.
-      unused_resource: (Resource) The resource which owns this method.
+        Args:
+          unused_the_api: (Api) The API tree which owns this method.
+          method: (Method) The method to annotate.
+          unused_resource: (Resource) The resource which owns this method.
 
-    Raises:
-      ValueError: if missing externalTypeName
-    """
-    for attr in ('requestType', 'responseType'):
-      schema = method.get(attr)
-      if schema and not isinstance(schema, data_types.Void):
-        name = schema.get('externalTypeName')
-        if not name:
-          raise ValueError('missing externalTypeName for %s (%s of method %s)'
-                           % (schema['id'], attr, method['rpcMethod']))
-        java_name = schema.get('javaTypeName')
-        proto_name = java_name or 'TO_BE_COMPUTED.' + name[name.rfind('.')+1:]
-        schema.SetTemplateValue('protoFullClassName', proto_name)
-
+        Raises:
+          ValueError: if missing externalTypeName
+        """
+        for attr in ('requestType', 'responseType'):
+            schema = method.get(attr)
+            if schema and not isinstance(schema, data_types.Void):
+                name = schema.get('externalTypeName')
+                if not name:
+                    raise ValueError('missing externalTypeName for %s (%s of method %s)'
+                                     % (schema['id'], attr, method['rpcMethod']))
+                java_name = schema.get('javaTypeName')
+                proto_name = java_name or 'TO_BE_COMPUTED.' + \
+                    name[name.rfind('.')+1:]
+                schema.SetTemplateValue('protoFullClassName', proto_name)

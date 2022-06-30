@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,42 +18,41 @@
 __author__ = 'yanivi@google.com (Yaniv Inbar)'
 
 
+from absl.testing import absltest
+import gwt_generator
 
-from google.apputils import basetest
-from googleapis.codegen import gwt_generator
 
+class GwtApiTest(absltest.TestCase):
 
-class GwtApiTest(basetest.TestCase):
+    def testGetCodeTypeFromDictionary(self):
+        """Test mapping of JSON schema types to GWT/Java class names."""
+        language_model = gwt_generator.GwtLanguageModel()
 
-  def testGetCodeTypeFromDictionary(self):
-    """Test mapping of JSON schema types to GWT/Java class names."""
-    language_model = gwt_generator.GwtLanguageModel()
+        test_cases = [
+            ['String', {'type': 'string', 'format': 'byte'}],
+            ['String', {'type': 'string', 'format': 'date-time'}],
+            ['Double', {'type': 'number', 'format': 'double'}],
+            ['Float', {'type': 'number', 'format': 'float'}],
+            ['Short', {'type': 'integer', 'format': 'int16'}],
+            ['Integer', {'type': 'integer', 'format': 'int32'}],
+            ['Long', {'type': 'string', 'format': 'int64'}],
+            ['String', {'type': 'any'}],
+            ['Boolean', {'type': 'boolean'}],
+            ['String', {'type': 'string'}],
+            ['Long', {'type': 'integer', 'format': 'uint32'}],
+            ['BigInteger', {'type': 'string', 'format': 'uint64'}],
+        ]
 
-    test_cases = [
-        ['String', {'type': 'string', 'format': 'byte'}],
-        ['String', {'type': 'string', 'format': 'date-time'}],
-        ['Double', {'type': 'number', 'format': 'double'}],
-        ['Float', {'type': 'number', 'format': 'float'}],
-        ['Short', {'type': 'integer', 'format': 'int16'}],
-        ['Integer', {'type': 'integer', 'format': 'int32'}],
-        ['Long', {'type': 'string', 'format': 'int64'}],
-        ['String', {'type': 'any'}],
-        ['Boolean', {'type': 'boolean'}],
-        ['String', {'type': 'string'}],
-        ['Long', {'type': 'integer', 'format': 'uint32'}],
-        ['BigInteger', {'type': 'string', 'format': 'uint64'}],
-    ]
+        for test_case in test_cases:
+            self.assertEquals(
+                test_case[0],
+                language_model.GetCodeTypeFromDictionary(test_case[1]))
+            # TODO(user) Create Property objects, make sure they have the right
+            # langauge model and see that prop.codeType == test_case[0]
 
-    for test_case in test_cases:
-      self.assertEquals(
-          test_case[0],
-          language_model.GetCodeTypeFromDictionary(test_case[1]))
-      # TODO(user) Create Property objects, make sure they have the right
-      # langauge model and see that prop.codeType == test_case[0]
-
-  # TODO(user): Add tests for import side effects on properties that
-  # require extra handling.
+    # TODO(user): Add tests for import side effects on properties that
+    # require extra handling.
 
 
 if __name__ == '__main__':
-  basetest.main()
+    basetest.main()

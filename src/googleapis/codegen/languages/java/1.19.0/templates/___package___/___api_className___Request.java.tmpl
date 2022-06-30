@@ -34,7 +34,7 @@ public abstract class {{ api.className }}Request<T> extends com.google.api.clien
 {% for param in api.parameters %}
 
 {% indent 1 %}{% doc_comment_if param.description %}{% endindent %}
-  @com.google.api.client.util.Key{% ifnotequal param.wireName param.memberName %}("{{ param.wireName }}"){% endifnotequal %}
+  @com.google.api.client.util.Key{% if param.wireName != param.memberName %}("{{ param.wireName }}"){% endif %}
   private {{ param.codeType }} {{ param.memberName }};
 
   /**{% filter block_comment %}

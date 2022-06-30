@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,16 +27,18 @@ import collections
 import json
 import logging
 import os
-
+from collections import abc
 
 import httplib2
+from absl import flags as flags
 
-from google.apputils import app
-import gflags as flags
-from google.apputils import resources
-from googleapis.codegen import generator_lookup
-from googleapis.codegen.filesys import package_writer_foundry
-from googleapis.codegen.targets import Targets
+import app as app
+import generator_lookup
+from filesys import package_writer_foundry
+from targets import Targets
+
+#from google.apputils import app, resources
+
 
 FLAGS = flags.FLAGS
 
@@ -103,13 +105,13 @@ flags.DEFINE_enum(
     'What kind of output to make.'
     ' plain=just the source,'
     ' full=turn on all the optional parts (useful for testing the generator).'
-    )
+)
 flags.DEFINE_string(
     'package_path',
     None,
     'Use an alternate path for the generated code. This must be a file path'
     ' using "/" as a separator, not "."'
-    )
+)
 flags.DEFINE_boolean(
     'reparent_methods_using_id',
     False,
@@ -134,47 +136,47 @@ flags.declare_key_flag('version_package')
 
 
 def main(unused_argv):
-  if not (FLAGS.api_name or FLAGS.input):
-    raise app.UsageError('You must specify one of --api_name or --input')
-  if FLAGS.api_name and FLAGS.input:
-    raise app.UsageError(
-        'You can only specify one of --api_name or --input')
-  if not (FLAGS.output_dir or FLAGS.output_file):
-    raise app.UsageError(
-        'You must specify one of --output_dir or --output_file')
-  if FLAGS.output_dir and FLAGS.output_file:
-    raise app.UsageError(
-        'You can only specify one of --output_dir or --output_file')
+    if not (FLAGS.api_name or FLAGS.input):
+        raise app.UsageError('You must specify one of --api_name or --input')
+    if FLAGS.api_name and FLAGS.input:
+        raise app.UsageError(
+            'You can only specify one of --api_name or --input')
+    if not (FLAGS.output_dir or FLAGS.output_file):
+        raise app.UsageError(
+            'You must specify one of --output_dir or --output_file')
+    if FLAGS.output_dir and FLAGS.output_file:
+        raise app.UsageError(
+            'You can only specify one of --output_dir or --output_file')
 
-  if FLAGS.verbose:
-    logging.basicConfig(level=logging.DEBUG)
+    if FLAGS.verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
+    # Get the discovery document
+    if FLAGS.api_name:
+        if not FLAGS.api_version:
+            raise app.UsageError(
+                'You must specify --api_version with --api_name')
+        content = GetApiDiscovery(FLAGS.api_name, FLAGS.api_version)
+    else:
+        f = open(FLAGS.input)
+        content = f.read()
+        f.close()
+    discovery_doc = json.loads(
+        content, object_pairs_hook=collections.OrderedDict)
 
-  # Get the discovery document
-  if FLAGS.api_name:
-    if not FLAGS.api_version:
-      raise app.UsageError('You must specify --api_version with --api_name')
-    content = GetApiDiscovery(FLAGS.api_name, FLAGS.api_version)
-  else:
-    f = open(FLAGS.input)
-    content = f.read()
-    f.close()
-  discovery_doc = json.loads(content, object_pairs_hook=collections.OrderedDict)
+    package_writer = package_writer_foundry.GetPackageWriter(
+        output_dir=FLAGS.output_dir, output_file=FLAGS.output_file,
+        output_format=FLAGS.output_format)
 
-
-  package_writer = package_writer_foundry.GetPackageWriter(
-      output_dir=FLAGS.output_dir, output_file=FLAGS.output_file,
-      output_format=FLAGS.output_format)
-
-  Generate(discovery_doc=discovery_doc,
-           package_writer=package_writer,
-           include_timestamp=FLAGS.include_timestamp,
-           version_package=FLAGS.version_package,
-           package_path=FLAGS.package_path,
-           output_type=FLAGS.output_type,
-           language=FLAGS.language,
-           language_variant=FLAGS.language_variant)
-  return 0
+    Generate(discovery_doc=discovery_doc,
+             package_writer=package_writer,
+             include_timestamp=FLAGS.include_timestamp,
+             version_package=FLAGS.version_package,
+             package_path=FLAGS.package_path,
+             output_type=FLAGS.output_type,
+             language=FLAGS.language,
+             language_variant=FLAGS.language_variant)
+    return 0
 
 
 def Generate(discovery_doc, package_writer,
@@ -185,74 +187,74 @@ def Generate(discovery_doc, package_writer,
              language='java',
              language_variant='default',
              callback=None):
-  """Generate a library package from discovery and options."""
-  options = {
-      # Include other files needed to compile (e.g. base jar files)
-      'include_dependencies': False,
-      # Include the timestamp in the generated library
-      'include_timestamp': include_timestamp,
-      # Put API version in the package
-      'version_package': version_package,
-      # Custom package name
-      'package_path': package_path,
-      }
-  if FLAGS.monolithic_source_name:
-    options['useSingleSourceFile'] = True
-  if output_type == 'full':
-    options['include_dependencies'] = True
-  if FLAGS.reparent_methods_using_id:
-    discovery_doc['reparentMethodsUsingId'] = True
+    """Generate a library package from discovery and options."""
+    options = {
+        # Include other files needed to compile (e.g. base jar files)
+        'include_dependencies': False,
+        # Include the timestamp in the generated library
+        'include_timestamp': include_timestamp,
+        # Put API version in the package
+        'version_package': version_package,
+        # Custom package name
+        'package_path': package_path,
+    }
+    if FLAGS.monolithic_source_name:
+        options['useSingleSourceFile'] = True
+    if output_type == 'full':
+        options['include_dependencies'] = True
+    if FLAGS.reparent_methods_using_id:
+        discovery_doc['reparentMethodsUsingId'] = True
 
-  # determine language version from language variant.
-  language_variations = Targets().VariationsForLanguage(language)
-  if not language_variations:
-    raise app.UsageError('Language %s missing from '
-                         'apiserving/libgen/gen/targets.json' %
-                         language)
-  features = language_variations.GetFeatures(language_variant)
-  if not features:
-    raise app.UsageError('Unsupported language variant: '
-                         '%s/%s/features.json is missing' %
-                         language, language_variant)
-  try:
-    generator_class = generator_lookup.GetGeneratorByLanguage(
-        features.get('generator', language))
-  except ValueError:
-    raise app.UsageError('Unsupported language: %s' % language)
+    # determine language version from language variant.
+    language_variations = Targets().VariationsForLanguage(language)
+    if not language_variations:
+        raise app.UsageError('Language %s missing from '
+                             'apiserving/libgen/gen/targets.json' %
+                             language)
+    features = language_variations.GetFeatures(language_variant)
+    if not features:
+        raise app.UsageError('Unsupported language variant: '
+                             '%s/%s/features.json is missing' %
+                             language, language_variant)
+    try:
+        generator_class = generator_lookup.GetGeneratorByLanguage(
+            features.get('generator', language))
+    except ValueError:
+        raise app.UsageError('Unsupported language: %s' % language)
 
-  generator = generator_class(discovery_doc, options=options)
-  if FLAGS.monolithic_source_name:
-    generator.api.SetTemplateValue('monolithicSourceName',
-                                   FLAGS.monolithic_source_name)
-  generator.SetTemplateDir(features.template_dir)
-  generator.SetFeatures(features)
-  generator.GeneratePackage(package_writer)
-  package_writer.DoneWritingArchive()
-  if callback:
-    callback(discovery_doc=discovery_doc,
-             package_writer=package_writer,
-             include_timestamp=include_timestamp,
-             version_package=version_package,
-             package_path=package_path,
-             output_type=output_type,
-             language=language,
-             language_variant=language_variant)
+    generator = generator_class(discovery_doc, options=options)
+    if FLAGS.monolithic_source_name:
+        generator.api.SetTemplateValue('monolithicSourceName',
+                                       FLAGS.monolithic_source_name)
+    generator.SetTemplateDir(features.template_dir)
+    generator.SetFeatures(features)
+    generator.GeneratePackage(package_writer)
+    package_writer.DoneWritingArchive()
+    if callback:
+        callback(discovery_doc=discovery_doc,
+                 package_writer=package_writer,
+                 include_timestamp=include_timestamp,
+                 version_package=version_package,
+                 package_path=package_path,
+                 output_type=output_type,
+                 language=language,
+                 language_variant=language_variant)
 
 
 def GetApiDiscovery(api_name, api_version):
-  """Get a discovery doc from the discovery server."""
-  api_path = 'apis/%s/%s/rest' % (api_name, api_version)
+    """Get a discovery doc from the discovery server."""
+    api_path = 'apis/%s/%s/rest' % (api_name, api_version)
 
-  discovery_url = 'https://%s/discovery/%s/%s' % (
-      FLAGS.discovery_server, FLAGS.discovery_version, api_path)
-  http = httplib2.Http()
-  _, content = http.request(discovery_url)
-  discovery_doc = json.loads(content)
-  error = discovery_doc.get('error')
-  if error:
-    raise app.Error(error)
-  return content
+    discovery_url = 'https://%s/discovery/%s/%s' % (
+        FLAGS.discovery_server, FLAGS.discovery_version, api_path)
+    http = httplib2.Http()
+    _, content = http.request(discovery_url)
+    discovery_doc = json.loads(content)
+    error = discovery_doc.get('error')
+    if error:
+        raise app.Error(error)
+    return content
 
 
 if __name__ == '__main__':
-  app.run()
+    app.run()

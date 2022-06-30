@@ -6,11 +6,11 @@ set("alt", "json") is generated if any of the cases are true:
 * If method does not have an alt parameter and global parameters does not have an alt parameter.
 {% endcomment %}
 {% if method.alt.default %}
-  {% ifnotequal method.alt.default "json" %}
+  {% if method.alt.default != "json" %}
     set("alt", "json");
-  {% endifnotequal %}
+  {% endif %}
 {% else %}
-  {% ifnotequal api.alt.default "json" %}
+  {% if api.alt.default != "json" %}
     set("alt", "json");
-  {% endifnotequal %}
+  {% endif %}
 {% endif %}
